@@ -110,7 +110,7 @@ public class PhantomUrlHandler {
                     error: error
                 )
                 
-            case "phantom_sign_and_send_transaction":
+            case "phantom_sign_and_send_transaction", "phantom_sign_message":
                     
                 guard let data = params["data"] as? String,
                       let nonce = params["nonce"] as? String,
@@ -142,36 +142,6 @@ public class PhantomUrlHandler {
                     signature: signature,
                     error: nil
                 )
-        case "phantom_sign_message":
-            
-            guard let data = params["data"] as? String,
-                  let nonce = params["nonce"] as? String,
-                  let phantomEncryptionPublicKey = phantomEncryptionPublicKey,
-                  let dappSecretKey = dappSecretKey else {
-                
-                return .signMessage(signature: nil,
-                                    error: error
-                )
-            }
-            
-            let json = try PhantomUtils.decryptPayload(
-                data: data,
-                nonce: nonce,
-                phantomEncryptionPublicKey: phantomEncryptionPublicKey,
-                dappSecretKey: dappSecretKey
-            )
-            
-            guard let signature = json?["signature"] else {
-                return .signMessage(
-                    signature: nil,
-                    error: error
-                )
-            }
-            
-            return .signMessage(
-                signature: signature,
-                error: nil
-            )
         default:
                 return .unknown
         }

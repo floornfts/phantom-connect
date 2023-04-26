@@ -163,7 +163,7 @@ public class PhantomConnectService {
         
         guard let url = UrlUtils.format("\(phantomBase)ul/\(version!)/signMessage", parameters: [
             "dapp_encryption_public_key": encryptionPublicKey.base58EncodedString,
-            "redirect_link": "\(PhantomConnectService.redirectUrl!)phantom_sign_and_send_transaction",
+            "redirect_link": "\(PhantomConnectService.redirectUrl!)phantom_sign_message",
             "nonce": nonce,
             "payload": payload
         ]) else {

@@ -77,4 +77,15 @@ extension View {
         
     }
     
+    /*
+     For now, this is handled identically to a transaction
+     */
+    public func onWalletSignedMessage(
+        phantomEncryptionPublicKey: PublicKey?,
+        dappEncryptionSecretKey: Data?,
+        perform: @escaping OnWalletTransactionAction
+    ) -> some View {
+        onWalletTransaction(phantomEncryptionPublicKey: phantomEncryptionPublicKey, dappEncryptionSecretKey: dappEncryptionSecretKey, perform: perform)
+    }
+    
 }
