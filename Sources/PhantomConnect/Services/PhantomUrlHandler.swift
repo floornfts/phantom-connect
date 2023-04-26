@@ -110,7 +110,7 @@ public class PhantomUrlHandler {
                     error: error
                 )
                 
-            case "phantom_sign_and_send_transaction":
+            case "phantom_sign_and_send_transaction", "phantom_sign_message":
                     
                 guard let data = params["data"] as? String,
                       let nonce = params["nonce"] as? String,
@@ -142,8 +142,7 @@ public class PhantomUrlHandler {
                     signature: signature,
                     error: nil
                 )
-                                
-            default:
+        default:
                 return .unknown
         }
         
