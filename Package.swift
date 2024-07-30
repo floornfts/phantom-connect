@@ -15,7 +15,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/floornfts/Solana.Swift.git",
-            branch: "master"
+            revision: "91183c9351d90c352ff557c659fc6fe16f64271c"
         )
     ],
     targets: [
