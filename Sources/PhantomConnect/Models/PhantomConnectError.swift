@@ -14,6 +14,7 @@ public enum PhantomConnectError: Error {
     case invalidSerializedTransaction
     case invalidConfiguration
     case invalidUrl
+    case userRejected
     
 }
 
@@ -36,6 +37,9 @@ extension PhantomConnectError: CustomStringConvertible {
                 
             case .invalidUrl:
                 return "Invalid URL"
+                
+            case .userRejected:
+                return "User rejected the request"
                 
         }
         
@@ -76,6 +80,12 @@ extension PhantomConnectError: LocalizedError {
                 return NSLocalizedString(
                     "Invalid URL",
                     comment: "Invalid URL"
+                )
+
+            case .userRejected:
+                return NSLocalizedString(
+                    "User rejected the request",
+                    comment: "User Rejected"
                 )
                 
         }
