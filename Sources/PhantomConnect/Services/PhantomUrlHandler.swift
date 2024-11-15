@@ -65,9 +65,13 @@ public class PhantomUrlHandler {
         var error: Error?
         
         if components.queryItems?[0].name == "errorCode" {
-                        
-            error = PhantomConnectError.invalidUrl
-            
+            if let code = components.queryItems?[0].value {
+                if code == "4001" {
+                    error = PhantomConnectError.userRejected
+                } else {
+                    error = PhantomConnectError.invalidUrl
+                }
+            }
         }
         
         switch host {
@@ -77,6 +81,15 @@ public class PhantomUrlHandler {
                       let dappSecretKey = dappSecretKey,
                       let data = params["data"] as? String,
                       let nonce = params["nonce"] as? String else {
+
+                    if let error = error {
+                        return .connect(
+                            publicKey: nil,
+                            phantomEncryptionPublicKey: nil,
+                            session: nil,
+                            error: error
+                        )
+                    }
                                         
                     return .unknown
                     
