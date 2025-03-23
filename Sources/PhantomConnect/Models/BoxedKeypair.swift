@@ -26,7 +26,7 @@ public struct BoxedKeypair {
 
     // MARK: - Init
 
-    init(publicKey: PublicKey, secretKey: Data) {
+    public init(publicKey: PublicKey, secretKey: Data) {
         self.publicKey = publicKey
         self.secretKey = secretKey
     }
