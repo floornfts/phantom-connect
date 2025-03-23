@@ -137,14 +137,49 @@ public class PhantomConnectService {
         assertionFailure("Not implemented")
         return nil
     }
-    
-    /// Not implemented yet
-    /// - SeeAlso:
-    ///   - https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction
-    public func signTransaction() throws -> URL? {
+
+    /// Prompt the user to sign a transaction via Phantom, returning a signed transaction to be broadcast by the app.
+    /// - Parameters:
+    ///   - serializedTransaction: A base58-encoded, serialized transaction string.
+    ///   - session: The session token from the connect method.
+    ///   - dappEncryptionPrivateKey: The dapp's private key for encryption.
+    ///   - phantomEncryptionPublicKey: Phantom's public key for encryption (from connect response).
+    ///   - version: Version of the Phantom deeplink API to use. Defaults to "v1".
+    /// - Returns: A URL to trigger the Phantom signing deeplink.
+    /// - SeeAlso: https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction
+    public func signTransaction(
+        serializedTransaction: String,
+        session: String,
+        dappEncryptionPrivateKey: Data,
+        phantomEncryptionPublicKey: PublicKey,
+        version: String = "v1"
+    ) throws -> URL {
         try checkConfiguration()
-        assertionFailure("Not implemented")
-        return nil
+
+        let payload: [String: String] = [
+            "transaction": serializedTransaction,
+            "session": session
+        ]
+
+        let (encryptedPayload, nonce) = try PhantomUtils.encryptPayload(
+            payload: payload,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+            dappSecretKey: dappEncryptionPrivateKey
+        )
+
+        guard let url = UrlUtils.format(
+            "\(phantomBase)ul/\(version)/signTransaction",
+            parameters: [
+                "dapp_encryption_public_key": Base58.encode(phantomEncryptionPublicKey.bytes),
+                "nonce": nonce,
+                "redirect_link": "\(PhantomConnectService.redirectUrl!)phantom_sign_transaction",
+                "payload": encryptedPayload
+            ]
+        ) else {
+            throw PhantomConnectError.invalidUrl
+        }
+
+        return url
     }
     
     /// Not implemented yet
