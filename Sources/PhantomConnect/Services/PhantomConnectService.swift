@@ -148,24 +148,12 @@ public class PhantomConnectService {
     /// - Returns: A URL to trigger the Phantom signing deeplink.
     /// - SeeAlso: https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction
     public func signTransaction(
-        serializedTransaction: String,
-        session: String,
-        dappEncryptionPrivateKey: Data,
+        encryptedPayload: String,
+        nonce: String,
         phantomEncryptionPublicKey: PublicKey,
         version: String = "v1"
     ) throws -> URL {
         try checkConfiguration()
-
-        let payload: [String: String] = [
-            "transaction": serializedTransaction,
-            "session": session
-        ]
-
-        let (encryptedPayload, nonce) = try PhantomUtils.encryptPayload(
-            payload: payload,
-            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
-            dappSecretKey: dappEncryptionPrivateKey
-        )
 
         guard let url = UrlUtils.format(
             "\(phantomBase)ul/\(version)/signTransaction",

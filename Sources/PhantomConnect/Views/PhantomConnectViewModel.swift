@@ -126,7 +126,46 @@ public class PhantomConnectViewModel: ObservableObject {
 #endif
         
     }
-    
+
+    /// Prompt the user to sign a transaction via Phantom, returning a signed transaction to be broadcast by the app.
+    /// - Parameters:
+    ///   - serializedTransaction: A base58-encoded, serialized transaction string.
+    ///   - session: The session token from the connect method.
+    ///   - dappEncryptionPrivateKey: The dapp's private key for encryption.
+    ///   - phantomEncryptionPublicKey: Phantom's public key for encryption (from connect response).
+    ///   - version: Version of the Phantom deeplink API to use. Defaults to "v1".
+    /// - Returns: A URL to trigger the Phantom signing deeplink.
+    /// - SeeAlso: https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction
+    public func signTransaction(
+        serializedTransaction: String,
+        session: String,
+        dappEncryptionPrivateKey: Data,
+        phantomEncryptionPublicKey: PublicKey,
+        version: String = "v1"
+    ) throws {
+
+        let payload: [String: String] = [
+            "transaction": serializedTransaction,
+            "session": session
+        ]
+
+        let (encryptedPayload, nonce) = try PhantomUtils.encryptPayload(
+            payload: payload,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+            dappSecretKey: dappEncryptionPrivateKey
+        )
+
+        let url = try phantomConnectService.signTransaction(
+            encryptedPayload: encryptedPayload,
+            nonce: nonce,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey
+        )
+
+#if os(iOS)
+        UIApplication.shared.open(url)
+#endif
+    }
+
     public func signMessage(
         base58Message:String?,
         phantomEncryptionKey: PublicKey?,
