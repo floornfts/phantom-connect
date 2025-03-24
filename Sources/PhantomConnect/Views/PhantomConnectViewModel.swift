@@ -87,44 +87,47 @@ public class PhantomConnectViewModel: ObservableObject {
         
     }
     
-    /// Creates url for sending and signing a serialized solana transaction with the phantom app
+    /// Creates a URL for signing a serialized Solana transaction with the Phantom app, allowing the app to broadcast the signed transaction.
     /// - Parameters:
-    ///   - serializedTransaction: Serialized solana transaction
-    ///   - dappEncryptionKey: The public key generated for original connection
-    ///   - phantomEncryptionKey: Public key returned from phantom during initial connection
-    ///   - session: Session returned from original connection with phantom
-    ///   - dappSecretKey: 32 Byte private key generated for initial phatom wallet connection
-    public func sendAndSignTransaction(
-        serializedTransaction: String?,
-        dappEncryptionKey: PublicKey?,
-        phantomEncryptionKey: PublicKey?,
-        session: String?,
-        dappSecretKey: Data?
+    ///   - serializedTransaction: A base58-encoded, serialized Solana transaction string.
+    ///   - session: The session token received from the initial connection with Phantom.
+    ///   - dappEncryptionPrivateKey: The dapp's 32-byte private key used for encryption, generated during the initial Phantom wallet connection.
+    ///   - dappEncryptionPublicKey: The dapp's public key used for encryption, generated during the initial Phantom wallet connection (from linkingKeypair.publicKey).
+    ///   - phantomEncryptionPublicKey: Phantom's public key for encryption, returned during the initial connection.
+    ///   - version: The version of the Phantom deeplink API to use. Defaults to "v1".
+    /// - Throws: `PhantomConnectError` if encryption fails, the URL cannot be constructed, or the configuration is invalid.
+    /// - SeeAlso: [Phantom Documentation - signTransaction](https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction)
+    public func signTransaction(
+        serializedTransaction: String,
+        session: String,
+        dappEncryptionPrivateKey: Data,
+        dappEncryptionPublicKey: PublicKey,
+        phantomEncryptionPublicKey: PublicKey,
+        version: String = "v1"
     ) throws {
-        
-        guard let serializedTransaction = serializedTransaction else {
-            throw PhantomConnectError.invalidSerializedTransaction
-        }
+        let payload: [String: String] = [
+            "transaction": serializedTransaction,
+            "session": session
+        ]
         
         let (encryptedPayload, nonce) = try PhantomUtils.encryptPayload(
-            payload: [
-                "session": session ?? "",
-                "transaction": serializedTransaction
-            ],
-            phantomEncryptionPublicKey: phantomEncryptionKey,
-            dappSecretKey: dappSecretKey
+            payload: payload,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+            dappSecretKey: dappEncryptionPrivateKey
         )
         
-        let url = try phantomConnectService.signAndSendTransaction(
-            encryptionPublicKey: dappEncryptionKey,
-            nonce: nonce,
-            payload: encryptedPayload
+        let url = try phantomConnectService.signTransaction(
+            serializedTransaction: serializedTransaction,
+            session: session,
+            dappEncryptionPrivateKey: dappEncryptionPrivateKey,
+            dappEncryptionPublicKey: dappEncryptionPublicKey,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+            version: version
         )
         
 #if os(iOS)
         UIApplication.shared.open(url)
 #endif
-        
     }
 
     /// Prompt the user to sign a transaction via Phantom, returning a signed transaction to be broadcast by the app.
