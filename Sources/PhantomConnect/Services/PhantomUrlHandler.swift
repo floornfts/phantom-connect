@@ -122,7 +122,28 @@ public class PhantomUrlHandler {
                 return .disconnect(
                     error: error
                 )
-                
+
+        case "phantom_sign_transaction":
+                    guard let data = params["data"] as? String,
+                          let nonce = params["nonce"] as? String,
+                          let phantomEncryptionPublicKey = phantomEncryptionPublicKey,
+                          let dappSecretKey = dappSecretKey else {
+                        return .signTransaction(nonce: nil, data: nil, error: error)
+                    }
+
+                    let json = try PhantomUtils.decryptPayload(
+                        data: data,
+                        nonce: nonce,
+                        phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+                        dappSecretKey: dappSecretKey
+                    )
+
+                    guard let signedTransaction = json?["transaction"] else {
+                        return .signTransaction(nonce: nonce, data: data, error: PhantomConnectError.invalidResponse)
+                    }
+
+                    return .signTransaction(nonce: nonce, data: signedTransaction, error: nil)
+
             case "phantom_sign_and_send_transaction", "phantom_sign_message":
                     
                 guard let data = params["data"] as? String,
