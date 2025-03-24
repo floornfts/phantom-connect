@@ -138,30 +138,41 @@ public class PhantomConnectService {
         return nil
     }
 
-    /// Prompts the user to sign a transaction via Phantom, returning a URL to trigger the Phantom signing deeplink.
-    /// This method constructs a deeplink URL that, when opened, prompts the user to sign a transaction in the Phantom wallet.
-    /// The app is responsible for broadcasting the signed transaction after receiving it via the redirect link.
-    ///
+    /// Prompt the user to sign a transaction via Phantom, returning a signed transaction to be broadcast by the app.
     /// - Parameters:
-    ///   - encryptedPayload: A base58-encoded, encrypted payload containing the serialized transaction and session token.
-    ///   - nonce: A nonce used for encryption, ensuring the payload’s integrity.
-    ///   - phantomEncryptionPublicKey: Phantom’s public key for encryption, obtained from the connect response.
-    ///   - version: The version of the Phantom deeplink API to use. Defaults to "v1".
-    /// - Returns: A URL that triggers the Phantom signing deeplink.
-    /// - Throws: `PhantomConnectError.invalidUrl` if the URL cannot be constructed, or other errors if the configuration is invalid.
-    /// - SeeAlso: [Phantom Documentation - signTransaction](https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction)
+    ///   - serializedTransaction: A base58-encoded, serialized transaction string.
+    ///   - session: The session token from the connect method.
+    ///   - dappEncryptionPrivateKey: The dapp's private key for encryption.
+    ///   - dappEncryptionPublicKey: The dapp's public key for encryption (from linkingKeypair.publicKey).
+    ///   - phantomEncryptionPublicKey: Phantom's public key for encryption (from connect response).
+    ///   - version: Version of the Phantom deeplink API to use. Defaults to "v1".
+    /// - Returns: A URL to trigger the Phantom signing deeplink.
+    /// - SeeAlso: https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction
     public func signTransaction(
-        encryptedPayload: String,
-        nonce: String,
+        serializedTransaction: String,
+        session: String,
+        dappEncryptionPrivateKey: Data,
+        dappEncryptionPublicKey: PublicKey,
         phantomEncryptionPublicKey: PublicKey,
         version: String = "v1"
     ) throws -> URL {
         try checkConfiguration()
 
+        let payload: [String: String] = [
+            "transaction": serializedTransaction,
+            "session": session
+        ]
+
+        let (encryptedPayload, nonce) = try PhantomUtils.encryptPayload(
+            payload: payload,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+            dappSecretKey: dappEncryptionPrivateKey
+        )
+
         guard let url = UrlUtils.format(
             "\(phantomBase)ul/\(version)/signTransaction",
             parameters: [
-                "dapp_encryption_public_key": Base58.encode(phantomEncryptionPublicKey.bytes),
+                "dapp_encryption_public_key": dappEncryptionPublicKey.base58EncodedString,
                 "nonce": nonce,
                 "redirect_link": "\(PhantomConnectService.redirectUrl!)phantom_sign_transaction",
                 "payload": encryptedPayload
@@ -172,7 +183,7 @@ public class PhantomConnectService {
 
         return url
     }
-    
+
     /// Not implemented yet
     /// - SeeAlso:
     /// - https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signmessage
