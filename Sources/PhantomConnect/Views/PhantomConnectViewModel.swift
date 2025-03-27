@@ -145,16 +145,6 @@ public class PhantomConnectViewModel: ObservableObject {
         phantomEncryptionPublicKey: PublicKey,
         version: String = "v1"
     ) throws {
-        let payload: [String: String] = [
-            "transaction": serializedTransaction,
-            "session": session
-        ]
-
-        let (encryptedPayload, nonce) = try PhantomUtils.encryptPayload(
-            payload: payload,
-            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
-            dappSecretKey: dappEncryptionPrivateKey
-        )
 
         let url = try phantomConnectService.signTransaction(
             serializedTransaction: serializedTransaction,

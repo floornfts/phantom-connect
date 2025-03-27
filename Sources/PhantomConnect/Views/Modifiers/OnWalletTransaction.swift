@@ -40,7 +40,7 @@ public struct OnWalletTransaction: ViewModifier {
                             case .signAndSendTransaction(let signature, let error):
                                 perform(signature, error)
 
-                            case .signTransaction(let nonce, let data, let error):
+                            case .signTransaction(_, let data, let error):
                                 if let error = error {
                                     perform(nil, error)
                                 } else if let signedTx = data {
