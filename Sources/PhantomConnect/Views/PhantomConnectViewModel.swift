@@ -126,7 +126,40 @@ public class PhantomConnectViewModel: ObservableObject {
 #endif
         
     }
-    
+
+    /// Creates a URL for signing a serialized Solana transaction with the Phantom app, allowing the app to broadcast the signed transaction.
+    /// - Parameters:
+    ///   - serializedTransaction: A base58-encoded, serialized Solana transaction string.
+    ///   - session: The session token received from the initial connection with Phantom.
+    ///   - dappEncryptionPrivateKey: The dapp's 32-byte private key used for encryption, generated during the initial Phantom wallet connection.
+    ///   - dappEncryptionPublicKey: The dapp's public key used for encryption, generated during the initial Phantom wallet connection (from linkingKeypair.publicKey).
+    ///   - phantomEncryptionPublicKey: Phantom's public key for encryption, returned during the initial connection.
+    ///   - version: The version of the Phantom deeplink API to use. Defaults to "v1".
+    /// - Throws: `PhantomConnectError` if encryption fails, the URL cannot be constructed, or the configuration is invalid.
+    /// - SeeAlso: [Phantom Documentation - signTransaction](https://docs.phantom.app/integrating/deeplinks-ios-and-android/provider-methods/signtransaction)
+    public func signTransaction(
+        serializedTransaction: String,
+        session: String,
+        dappEncryptionPrivateKey: Data,
+        dappEncryptionPublicKey: PublicKey,
+        phantomEncryptionPublicKey: PublicKey,
+        version: String = "v1"
+    ) throws {
+
+        let url = try phantomConnectService.signTransaction(
+            serializedTransaction: serializedTransaction,
+            session: session,
+            dappEncryptionPrivateKey: dappEncryptionPrivateKey,
+            dappEncryptionPublicKey: dappEncryptionPublicKey,
+            phantomEncryptionPublicKey: phantomEncryptionPublicKey,
+            version: version
+        )
+
+        #if os(iOS)
+        UIApplication.shared.open(url)
+        #endif
+    }
+
     public func signMessage(
         base58Message:String?,
         phantomEncryptionKey: PublicKey?,

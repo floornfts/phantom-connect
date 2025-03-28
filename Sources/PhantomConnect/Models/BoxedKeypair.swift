@@ -23,5 +23,12 @@ public struct BoxedKeypair {
     
     /// 32 byte secret key
     public let secretKey: Data
-    
+
+    // MARK: - Init
+
+    public init(publicKey: PublicKey, secretKey: Data) {
+        self.publicKey = publicKey
+        self.secretKey = secretKey
+    }
+
 }

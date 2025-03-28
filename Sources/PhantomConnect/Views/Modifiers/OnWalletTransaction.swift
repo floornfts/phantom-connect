@@ -28,34 +28,35 @@ public struct OnWalletTransaction: ViewModifier {
     // MARK: Internal Methods
     
     public func body(content: Content) -> some View {
-        
-        content
-            .onOpenURL { url in
-                
-                if PhantomUrlHandler.canHandle(url: url) {
-                    
-                    if let deeplink = try? PhantomUrlHandler.parse(
-                        url: url,
-                        phantomEncryptionPublicKey: encryptionKey,
-                        dappSecretKey: secretKey
-                    ) {
-                        
-                        switch deeplink {
-                                
+            content
+                .onOpenURL { url in
+                    if PhantomUrlHandler.canHandle(url: url) {
+                        if let deeplink = try? PhantomUrlHandler.parse(
+                            url: url,
+                            phantomEncryptionPublicKey: encryptionKey,
+                            dappSecretKey: secretKey
+                        ) {
+                            switch deeplink {
                             case .signAndSendTransaction(let signature, let error):
                                 perform(signature, error)
-                                
+
+                            case .signTransaction(_, let data, let error):
+                                if let error = error {
+                                    perform(nil, error)
+                                } else if let signedTx = data {
+                                    perform(signedTx, nil)
+                                } else {
+                                    perform(nil, PhantomConnectError.invalidResponse)
+                                }
+
                             default:
                                 break
+                            }
                         }
-                        
                     }
-                    
                 }
-            }
-        
-    }
-    
+        }
+
 }
 
 @available(iOS 14.0, *)
