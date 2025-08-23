@@ -46,7 +46,7 @@ public class PhantomUtils {
             key: sharedSecret
         )
         
-        return (Base58.encode(encryptedPayload.bytes), Base58.encode(nonce.bytes))
+        return (Base58.encode(Array(encryptedPayload)), Base58.encode(Array(nonce)))
         
     }
     

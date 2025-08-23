@@ -20,7 +20,7 @@ extension String {
     
     /// Helper for converting a UTF8 string to a Base58 encoding string
     var base58EncodedString: String {
-        return Base58.encode(self.bytes)
+        return Base58.encode(Array(self.utf8))
     }
     
     /// Helper for converting a UTF8 string into Base58 encoded data

@@ -50,7 +50,7 @@ public class PhantomConnectService {
         
         guard let url = UrlUtils.format("\(phantomBase)ul/\(version!)/connect", parameters: [
             "app_url": PhantomConnectService.appUrl!,
-            "dapp_encryption_public_key": Base58.encode(publicKey.bytes),
+            "dapp_encryption_public_key": Base58.encode(Array(publicKey)),
             "redirect_link": "\(PhantomConnectService.redirectUrl!)phantom_connect",
             "cluster": "\(PhantomConnectService.cluster!)"
         ]) else {

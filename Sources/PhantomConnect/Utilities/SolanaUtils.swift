@@ -11,7 +11,7 @@ import TweetNacl
 
 extension Data {
     var base58EncodedString: String {
-        Base58.encode(bytes)
+        Base58.encode(Array(self))
     }
 }
 
@@ -40,7 +40,7 @@ struct SolanaUtils {
         let keypair = try TweetNacl.NaclSign.KeyPair.keyPair()
         
         return SigningKeypair(
-            publicKey: PublicKey(bytes: keypair.publicKey.bytes) ?? PublicKey(bytes: PublicKey.NULL_PUBLICKEY_BYTES)!,
+            publicKey: PublicKey(bytes: Array(keypair.publicKey)) ?? PublicKey(bytes: PublicKey.NULL_PUBLICKEY_BYTES)!,
             secretKey: keypair.secretKey
         )
         
@@ -53,7 +53,7 @@ struct SolanaUtils {
         let keypair = try TweetNacl.NaclBox.keyPair()
         
         return BoxedKeypair(
-            publicKey: PublicKey(bytes: keypair.publicKey.bytes) ?? PublicKey(bytes: PublicKey.NULL_PUBLICKEY_BYTES)!,
+            publicKey: PublicKey(bytes: Array(keypair.publicKey)) ?? PublicKey(bytes: PublicKey.NULL_PUBLICKEY_BYTES)!,
             secretKey: keypair.secretKey
         )
         

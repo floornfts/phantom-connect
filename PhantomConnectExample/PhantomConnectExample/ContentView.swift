@@ -155,7 +155,7 @@ struct ContentView: View {
             let serializedTransaction = try? transaction.serialize().get()
             
             DispatchQueue.main.async {
-                completion(Base58.encode(serializedTransaction!.bytes))
+                completion(Base58.encode(Array(serializedTransaction!)))
             }
             
         }
